@@ -1,0 +1,6 @@
+[submodule "KCD1/private"]
+	path = KCD1/private
+	url = git@github.com:Gedevan-Aleksizde/KCD1-JP-private.git
+[submodule "KCD2/private"]
+	path = KCD2/private
+	url = git@github.com:Gedevan-Aleksizde/KCD2-JP-private.git
