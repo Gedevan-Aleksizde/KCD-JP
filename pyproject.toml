@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "kcd-modding"
+version = "0.1.0"
+description = ""
+authors = ["S-Katagiri <katagiri.stsh@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pandas = "^2.2.3"
+json5 = "^0.10.0"
+regex = "^2024.11.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
