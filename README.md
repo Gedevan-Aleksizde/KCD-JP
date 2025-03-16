@@ -3,11 +3,13 @@
 KCD1, 2 の固有名詞を現地語準拠にしたり, 各種誤訳等を修正したりする
 
 
-TODO: 未変更箇所もまとめて配布するのは良くないと思う.
+* KCD1: https://www.nexusmods.com/kingdomcomedeliverance/mods/1891
+* KCD2: https://www.nexusmods.com/kingdomcomedeliverance2/mods/936
+
 
 ## ユーザー向け
 
-Releases から最新のものをダウンロードしてください.
+上記のリンク先または 右の Releases から最新のものをダウンロードしてください.
 
 ## 自分で使いたい人向け
 
