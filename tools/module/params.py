@@ -7,6 +7,7 @@ parser.add_argument("dir_root", type=Path, default=Path("./"))
 parser.add_argument("--intermediate", type=Path, default=None)
 parser.add_argument("--dir-lang", type=Path, default=None)
 parser.add_argument("--dir-cz", type=Path, default=None)
+parser.add_argument("--dir-en", type=Path, default=None)
 parser.add_argument("--dicts", type=Path, default=None)
 parser.add_argument("--dicts-id", type=Path, default=None)
 parser.add_argument("--dicts-rev", type=Path, default=None)
@@ -28,6 +29,9 @@ def rename_args(args_base: argparse.Namespace) -> argparse.Namespace:
     )
     args_new.dir_cz = _append_path(
         args_new.dir_root, args_base.dir_cz, "private/Czech_xml"
+    )
+    args_new.dir_en = _append_path(
+        args_new.dir_root, args_base.dir_en, "private/English_xml"
     )
     args_new.dicts = _append_path(args_new.dir_root, args_base.dicts, "dicts")
     args_new.dicts_id = _append_path(args_new.dir_root, args_base.dicts, "dicts-id")

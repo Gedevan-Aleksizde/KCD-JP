@@ -17,18 +17,20 @@ class TranslationDicts:
     rev_by_match: pd.DataFrame
 
 
+def read_xml(filepath: Path) -> pd.DataFrame:
+    xml = ET.parse(filepath)
+    root = xml.getroot()
+    d = pd.DataFrame(
+        [[cell.text for cell in row.findall("Cell")] for row in root.findall("Row")],
+        columns=["id", "text1", "text2"],
+    ).assign(fp=filepath.name)
+    return d
+
+
 def read_xmls(path: Path):
     ds = []
     for fp in path.glob("*.xml"):
-        xml = ET.parse(fp)
-        root = xml.getroot()
-        d = pd.DataFrame(
-            [
-                [cell.text for cell in row.findall("Cell")]
-                for row in root.findall("Row")
-            ],
-            columns=["id", "text_EN", "text"],
-        ).assign(fp=fp.name)
+        d = read_xml(fp)
         ds += [d]
     return pd.concat(ds)
 
@@ -142,31 +144,62 @@ def extractall(x: str, pattern: regex.Pattern):
     return pattern.findall(x)
 
 
-def main(args: argparse.Namespace):
-    df_text_jp = read_xmls(args.dir_lang)
-    df_text_cz = (
-        read_xmls(args.dir_cz).rename(columns={"text": "text_CZ"}).drop(columns=["fp"])
+def filter_duplication(data: pd.DataFrame, col: str) -> pd.DataFrame:
+    df_nunique = (
+        data.groupby(["id"])[col]
+        .nunique()
+        .reset_index()
+        .loc[lambda d: d[col] > 1]
+        .rename(columns={col: "n_uniq"})
     )
-    df = (
-        df_text_cz.merge(df_text_jp, on=["id"], how="outer")
-        .assign(
-            is_CZ=lambda d: ~d["text_CZ"].isna(), is_lang=lambda d: ~d["text"].isna()
-        )
-        .assign(
-            is_common=lambda d: d["is_lang"] & d["is_CZ"],
-            is_diff=lambda d: ((d["is_lang"]) | (d["is_CZ"])) & (~d["is_common"]),
-        )
-    ).rename(columns={"text_EN_y": "text_EN"})
+    return data.merge(df_nunique, on=["id"])
 
-    (
-        df.assign(
-            is_CZ=lambda d: d["is_CZ"].astype(int),
-            is_lang=lambda d: d["is_lang"].astype(int),
-            is_common=lambda d: d["is_common"].astype(int),
-            is_diff=lambda d: d["is_diff"].astype(int),
+
+def main(args: argparse.Namespace):
+    dict_df_text = {}
+    for col, fp, dp in [
+        ("text", "fp_lang", args.dir_lang),
+        ("text_CZ", "fp_CZ", args.dir_cz),
+        ("text_EN", "fp_EN", args.dir_en),
+    ]:
+        d = read_xmls(dp).rename(columns={"text2": col, "fp": fp})[["id", col, fp]]
+        d_dup = filter_duplication(d, col)
+        if d_dup.shape[0] != 0:
+            print(f"{dp} id has duplications")
+            d_dup.to_csv(f"tmp-{col}.csv", index=False)
+        dict_df_text[col] = d
+    del d, d_dup, col, fp, dp
+
+    df = (
+        dict_df_text["text_EN"]
+        .merge(dict_df_text["text_CZ"], on=["id"], how="outer")
+        .merge(dict_df_text["text"], on=["id"], how="outer")
+        .assign(
+            is_EN=lambda d: ~d["text_EN"].isna(),
+            is_CZ=lambda d: ~d["text_CZ"].isna(),
+            is_lang=lambda d: ~d["text"].isna(),
         )
-        .loc[lambda d: d["id"].str.contains("_uiName$", regex=True)]
-        .describe()
+        .assign(
+            is_total=1,
+            is_lang_cz=lambda d: d["is_lang"] & d["is_CZ"],
+            is_en_cz=lambda d: d["is_EN"] & d["is_CZ"],
+            is_lang_en=lambda d: d["is_lang"] & d["is_EN"],
+            is_all=lambda d: d["is_lang"] & d["is_EN"] & d["is_CZ"],
+        )
+        .fillna("")
+    )
+    print(
+        df[
+            [
+                "is_EN",
+                "is_CZ",
+                "is_lang",
+                "is_lang_cz",
+                "is_en_cz",
+                "is_lang_en",
+                "is_all",
+            ]
+        ].sum()
     )
 
     assert (
@@ -177,7 +210,7 @@ def main(args: argparse.Namespace):
     ), "uiNames intersection is non null!"
     # 日本語テキストは変な改行タグが入っている
     df["text"] = np.where(
-        df["fp"] == "text_ui_dialog.xml",
+        df["fp_EN"] == "text_ui_dialog.xml",
         df["text"].str.replace("<br/>", " ", regex=False),
         df["text"],
     )
@@ -217,6 +250,10 @@ def main(args: argparse.Namespace):
 
     df_modified_all = translate(df, dictionaries)
     df_modified_all = escape_xml_symbols(df_modified_all)
+    for col in ["text", "text_EN"]:
+        assert (
+            df_modified_all[col].isna().sum() == 0
+        ), f"df_modified_all[{col}] contains {df_modified_all[col].isna().sum()} NaN"
 
     fp_words_after = args.dir_interm.joinpath("words-after.csv")
     print(f"""writing into {fp_words_after}""")
@@ -251,16 +288,16 @@ def main(args: argparse.Namespace):
     if not args.dir_interm.joinpath("xml").exists():
         args.dir_interm.joinpath("xml").mkdir(parents=True)
 
-    for (fp,), d in df_modified_all.loc[
-        lambda d: d["text"] != d["text_original"]
-    ].groupby(["fp"]):
-        xml = df_2_xml(d)
-        print(f"""write to {args.dir_interm.joinpath(f"xml/{fp}")}""")
-        xml.write(
-            args.dir_interm.joinpath(f"xml/{fp}"),
-            xml_declaration=True,
-            encoding="utf-8",
-        )
+    # for (fp,), d in df_modified_all.loc[
+    #    lambda d: d["text"] != d["text_original"]
+    # ].groupby(["fp_EN"]):
+    #    xml = df_2_xml(d)
+    #    print(f"""write to {args.dir_interm.joinpath(f"xml/{fp}")}""")
+    #    xml.write(
+    #        args.dir_interm.joinpath(f"xml/{fp}"),
+    #        xml_declaration=True,
+    #        encoding="utf-8",
+    #    )
 
     xml = df_2_xml(df_modified_all.loc[lambda d: d["text"] != d["text_original"]])
     print(f"""write to {args.dir_out.joinpath(f"{args.xml_name}.xml")}""")
@@ -277,15 +314,26 @@ def main(args: argparse.Namespace):
 def translate(data: pd.DataFrame, dicts: TranslationDicts) -> pd.DataFrame:
     """
     DFに変換したXMLと辞書データを比較して一致する箇所を置換して返す
+    Args
+    -----
+    data: pd.DataFrame
+        以下の列を持つ
+        id
+        text,
+        text_EN,
+        text_CZ,
+        fp_lang,
+        fp_EN,
+        fp_CZ
     """
     data["text_original"] = data["text"]
     df_modified_id = data.merge(
-        dicts.by_id,
+        dicts.by_id[["id", "modified"]],
         on=["id"],
         how="inner",
-    ).assign(
-        text=lambda d: np.where(d["modified"].isna(), d["text"], d["modified"])
-    )[["id", "text_EN", "text", "fp"]]
+    ).assign(text=lambda d: np.where(d["modified"].isna(), d["text"], d["modified"]))[
+        ["id", "text_EN", "text", "fp_lang", "fp_EN", "fp_CZ"]
+    ]
     df_modified_left = data.merge(
         dicts.by_id[["id"]].assign(flag=True), on=["id"], how="left"
     ).loc[lambda d: d["flag"].isna()]
