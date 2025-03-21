@@ -34,7 +34,9 @@ def rename_args(args_base: argparse.Namespace) -> argparse.Namespace:
     args_new.dicts_rev = _append_path(
         args_new.dir_root, args_base.dicts_rev, "dicts-rev"
     )
-    args_new.dir_out = _append_path(args_new.dir_root, args_base.dir_out, "output")
+    args_new.dir_out = _append_path(
+        args_new.dir_root, args_base.dir_out, "private/output"
+    )
     args_new.xml_name = (
         "AltJPTranslation" if args_base.xml_name is None else args_base.xml_name
     )
