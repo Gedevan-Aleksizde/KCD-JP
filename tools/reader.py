@@ -18,6 +18,7 @@ class TranslationDicts:
 
 
 def read_xml(filepath: Path) -> pd.DataFrame:
+    print(f"reading {filepath.name}")
     xml = ET.parse(filepath)
     root = xml.getroot()
     d = pd.DataFrame(
@@ -27,9 +28,9 @@ def read_xml(filepath: Path) -> pd.DataFrame:
     return d
 
 
-def read_xmls(path: Path):
+def read_xmls(dirpath: Path):
     ds = []
-    for fp in path.glob("*.xml"):
+    for fp in dirpath.glob("*.xml"):
         d = read_xml(fp)
         ds += [d]
     return pd.concat(ds)
@@ -162,6 +163,7 @@ def main(args: argparse.Namespace):
         ("text_CZ", "fp_CZ", args.dir_cz),
         ("text_EN", "fp_EN", args.dir_en),
     ]:
+        print(f"searching {dp}")
         d = read_xmls(dp).rename(columns={"text2": col, "fp": fp})[["id", col, fp]]
         d_dup = filter_duplication(d, col)
         if d_dup.shape[0] != 0:
