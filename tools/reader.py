@@ -104,7 +104,7 @@ def escape_xml_symbols(
         .str.replace(">", "&gt;", regex=False)
         .str.replace("゠", "=", regex=False)  # フォントが対応していない…
         # .str.replace("&amp;nbsp;", "&nbsp;")
-        .str.replace("&nbsp;", "&amp;nbs;")
+        .str.replace("&nbsp;", "&amp;nbsp;")
         .str.replace("& ", "&amp;", regex=False)  # 和文で普通は使わないと思うが...
     )
     data[col_text_en] = (
