@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import argparse
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -185,7 +187,7 @@ def main(args: argparse.Namespace):
     # output original
 
     fp_terms = args.dir_interm.joinpath("terms.csv")
-    print(f"writing into {fp_terms}")
+    print(f"writing to {fp_terms}")
     df.loc[
         lambda d: (d["id"].str.contains("_uiName$", regex=True))
         | (d["id"].str.contains("^location_", regex=True))
@@ -308,14 +310,22 @@ def read_dicts(
     idは内容の変更に関係なく適用する
     条件一致は変更してないエントリーを除外する
     """
-    _df_dict = pd.concat([pd.read_csv(fp) for fp in fp_dicts.glob("*.csv")]).loc[
-        lambda d: ~d["modified"].isna()
-    ]
-    _df_dict_id = pd.concat([pd.read_csv(fp) for fp in fp_dicts_id.glob("*.csv")]).loc[
-        lambda d: ~d["modified"].isna()
-    ]
-    df_dict_rev = pd.concat([pd.read_csv(fp) for fp in fp_dicts_rev.glob("*.csv")])
 
+    def _read_csv_with_print_name(fp: Path) -> pd.DataFrame:
+        print(f"""reading {fp}""")
+        return pd.read_csv(fp)
+
+    _df_dict = pd.concat(
+        [_read_csv_with_print_name(fp) for fp in fp_dicts.glob("*.csv")]
+    ).loc[lambda d: ~d["modified"].isna()]
+    _df_dict_id = (
+        pd.concat([_read_csv_with_print_name(fp) for fp in fp_dicts_id.glob("*.csv")])
+        .loc[lambda d: ~d["modified"].isna()]
+        .assign(onlyid=lambda d: d["onlyid"].fillna(0))
+    )
+    df_dict_rev = pd.concat(
+        [_read_csv_with_print_name(fp) for fp in fp_dicts_rev.glob("*.csv")]
+    )
     df_by_id = pd.concat(
         (
             _df_dict.loc[
@@ -326,9 +336,11 @@ def read_dicts(
     )[["id", "modified"]].reset_index(drop=True)
     df_by_match = (
         pd.concat((_df_dict_id.loc[lambda d: ~(d["onlyid"] == 1)], _df_dict))
-        .loc[lambda d: (d["text"] != d["modified"]) & (d["onlyid"] != 1)][
-            ["text", "modified"]
-        ]
+        .loc[
+            lambda d: (d["text"] != d["modified"])
+            & (d["onlyid"] != 1)
+            & (~d["text"].isna() & ~d["modified"].isna())
+        ][["text", "modified"]]
         .drop_duplicates()
         .assign(n_words=lambda d: d["modified"].str.len())
         .sort_values(["n_words"], ascending=False)

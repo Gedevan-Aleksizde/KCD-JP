@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Optional
 
 parser = argparse.ArgumentParser()
-parser.add_argument("dir_root", type=Path, default=Path("./"))
+parser.add_argument("dir_root", type=Path)
 parser.add_argument("--intermediate", type=Path, default=None)
 parser.add_argument("--dir-lang", type=Path, default=None)
 parser.add_argument("--dir-cz", type=Path, default=None)

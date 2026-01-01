@@ -89,3 +89,5 @@ dicts, dicts-rev は, 以下のような列を持つ必要がある
 KCDのPAKファイルは実質ZIPのはずだが, 特殊なパラメータ設定がされているらしい. 1ではWinRARで圧縮したときだけ認識された. 2ではそれも使えなくなったが, 要求される設定で圧縮する専用ツールを作成したModderがいる.
 
 https://www.nexusmods.com/kingdomcomedeliverance2/mods/78
+
+追記: その後のアップデートでKCD2のファイルもWinRARで展開できるようになった.
