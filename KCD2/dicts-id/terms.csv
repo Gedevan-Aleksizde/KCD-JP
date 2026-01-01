@@ -962,7 +962,7 @@
 "ui_nm_f_simpledress05_m04","Surcoat","Surkot","サーコート","サーコート",
 "perk_cutting_edge_desc","If you cause bleeding with a saber attack, the target will bleed a quarter faster, making them easier to deal with.","Pokud útokem šavlí způsobíš krvácení, bude zasažený krvácet o 25&nbsp;% rychleji, takže jej vyřídíš snáze.","サーベルによる攻撃で出血させた場合、標的の出血速度が25&nbsp;%上昇し、より倒しやすくなる",,
 "perk_cutting_edge_lore_desc","The curved blade of the sabre is especially useful for quick slashes, which cut deeper and leave longer and more terrible slashes compared to a long sword. You can exploit the advantages of this design to the detriment of your opponents.","Prohnutá čepel šavle je úzpůsebá zejména k rychlým sekům, které oproti dlouhému meči dokáží tnout hlouběji a a zanechat delší a strašlivější sečné rány. Přednosti této konstrukce umíš, ke škodě protivníků, využít.","サーベルの湾曲した刃は切り傷を作りやすい。ロングソードよりも深く切りつけ、長く恐ろしい傷口を残す。傷を負わせることに特化した設計といえるだろう",,
-"char_ZACHARIAS_uiName","Zachariah","Zachariáš","ザカリア","ザハリアーシュ",
+"char_ZACHARIAS_uiName","Zachariah","Zachariáš","ザカリアス","ザハリアーシュ",
 "ui_in_ztracenaCest_zavisChest","The key to Zavish's chest.","Klíč od Závišovy truhly.","ザビッシュのチェストの鍵","ザーヴィシュのチェストの鍵だ。",
 "ui_nm_ztracenaCest_zavisChest","Zavish's chest key","Klíč od Závišovy truhly","ザビッシュのチェストの鍵","ザーヴィシュのチェストの鍵",
 "char_ZAVISUV_PES_ZIKMUNDOVO_uiName","Zavish's Wojta","Závišův pes Šarik","ザビッシュのヴォイタ","ザーヴィシュの飼い犬のシャリク",
@@ -1244,7 +1244,7 @@
 "ui_nm_prepadeniVlasskehoDvora_csabasStashKey","Csaba's key","Csabův klíč","チャバの鍵","チャバの鍵",
 "char_CSABA_MOLNAR_uiName","Csaba Molnár","Csaba Molnár","チャバ・モルナル","チャバ゠モルナール",
 "perk_thrasher_desc","Charged attacks deal 5&nbsp;% more damage.","Když zaútočíš z nápřahu, je takový útok ze základu mocnější. S tímto perkem bude ještě o dalších 10&nbsp;% mocnější, tedy snáze zasáhneš a naděláš více škody.","チャージ攻撃を行う際、通常以上の威力が出る。このパークを使うと威力が5&nbsp;%上昇し、命中しやすいだけでなく、与えるダメージも増える",,
-"ui_nm_cap24_mkarlik","Charlie's hat","Karlíkova čepice","チャーリーの帽子","カルリーンの帽子",
+"ui_nm_cap24_mkarlik","Charlie's hat","Karlíkova čepice","チャーリーの帽子","カルリークの帽子",
 "char_VEPR_CUCA_uiName","Chucha","Čůča","チュッカ","チューチカ",
 "ui_nm_tuniclong01_m01","Tunic","Tunika","チュニック","トゥニカ",
 "ui_nm_pracharna_concubineDress","Tyrol brocade cotehardie","Cotehardie z tyrolského brokátu","チロリアンブロケードのドレス","チロルのブロケードのドレス",
@@ -1373,8 +1373,8 @@
 "ui_nm_garlic","Garlic","Česnek","ニンニク","チェスネク",1
 "ui_in_leek","A distant relative of garlic. It whets the appetite and is a garnish to any vegetable soup.","Blízký příbuzný česneku i cibule. Chuť k jídlu povzbuzuje a je ozdobou každé polévky zeleninové.","ニンニクの遠い親戚。食欲をそそる薬味であり、どんな野菜スープにも合う",,
 "ui_in_garlic","Garlic, adds flavour and will heal any ailment as well as seasoning many dishes. But raw it burns the tongue.","Česnek se používal při vaření i jako všelék. Za syrova dost pálí.","ニンニクは香ばしさを加え、様々な料理の調味料となるだけでなく、あらゆる病に効く。ただし、生で食べると舌が燃えるほど辛い",,
-"perk_combo_C15_blunt_shield","Knee Crusher","Rozdrcení kolene","ニークラッシャー","膝割り",
-"perk_combo_C15_blunt","Knee Crusher","Rozdrcení kolene","ニークラッシャー","膝割り",
+"perk_combo_C15_blunt_shield","Knee Crusher","Rozdrcení kolene","ニークラッシャー","膝砕き",
+"perk_combo_C15_blunt","Knee Crusher","Rozdrcení kolene","ニークラッシャー","膝砕き",
 "perk_ratman_name","Rodent","Krysák","ネズミ","オオネズミ",1
 "qname_mysi1_MvWo","Mice","Myši","ネズミたち","ネズミたち",
 "perk_ratlik_name","Ratter","Ratlík","ネズミ取り","ネズミ取り",
@@ -1610,7 +1610,7 @@ Half plate legs","Plátové nohy půlené","ハーフプレートレッグ","板
 "char_KONRAD_Z_VECHTY_uiName","Konrad of Vechta","Konrád z Vechty","フェヒタのコンラッド","フェフタのコンラート",
 "ui_nm_the_die_e","Fer die","Hrací kostka Fer","フェルのダイス","「フェル」のダイス",
 "ui_nm_cap03_m01","Felt cap","Hučka plstěná","フェルトのキャップ","フェルト帽",
-"ui_nm_cap20_m01","Felt cap","Hučka jednoduchá","フェルトのキャップ","簡素な帽子",
+"ui_nm_cap20_m01","Felt cap","Hučka jednoduchá","フェルトのキャップ","フェルト帽",
 "ui_nm_cap27_m01","Felt hat","Čapka plstěná","フェルトの帽子","フェルトのつば付き帽",
 "ui_in_cap","Felt hats are generally popular for their durability and ease of shaping.","Plstěné čapky jsou všeobecně oblíbené pro svou výdrž a snadnou tvarovatelnost.","フェルト製の帽子は、耐久性と成形のしやすさで広く人気がある",,
 "ui_maplegend_trafficker","Fence","Překupník","フェンス","フェンス",
@@ -6200,4 +6200,5 @@ Half plate legs","Plátové nohy půlené","ハーフプレートレッグ","板
 "char_STANDA_MOUCHA_uiName","Standa the Fly",,"ハエのスタンダ","〈ハエ〉のスタニスラフ",1
 "ui_komori__o_seq1_1J2c",,"Nikvard Libák","","ニクヴァルド゠リバーク",1
 "cerny_ryt_jiri_ze_sovince_0MK9","George the Owl",,"梟のジョージ","〈梟〉のイジー",1
+"char_JIRI_ZE_SOVINCE_uiName","George the Owl",,"","〈梟〉のイジー",1
 "dial_duely_cer_he_he_jsi__ZGwR","Allow me to introduce myself. I am Sir George, called the Owl.","","","それでは名乗らせていただこう。 私はイジー卿。「梟」とも呼ばれている。",1
