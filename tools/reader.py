@@ -301,6 +301,8 @@ def main(args: argparse.Namespace):
         .str.replace("/head", "", regex=False)
         .str.replace("/accent", "", regex=False)
         .str.replace("&[a-z]+?&", "", regex=False)
+        .str.replace("“", "「", regex=False)
+        .str.replace("”", "」", regex=False)
     )
     summary_alphabet = summary_alphabet.loc[
         lambda d: d["text"].str.contains("[A-Za-zÀ-ÖØ-öø-ÿ]"),
