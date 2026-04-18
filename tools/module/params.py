@@ -33,10 +33,14 @@ def rename_args(args_base: argparse.Namespace) -> argparse.Namespace:
     args_new.dir_en = _append_path(
         args_new.dir_root, args_base.dir_en, "private/English_xml"
     )
-    args_new.dicts = _append_path(args_new.dir_root, args_base.dicts, "dicts")
-    args_new.dicts_id = _append_path(args_new.dir_root, args_base.dicts, "dicts-id")
+    args_new.dicts = _append_path(
+        args_new.dir_root, args_base.dicts, "private/dicts/dicts"
+    )
+    args_new.dicts_id = _append_path(
+        args_new.dir_root, args_base.dicts, "private/dicts/dicts-id"
+    )
     args_new.dicts_rev = _append_path(
-        args_new.dir_root, args_base.dicts_rev, "dicts-rev"
+        args_new.dir_root, args_base.dicts_rev, "private/dicts/dicts-rev"
     )
     args_new.dir_out = _append_path(
         args_new.dir_root, args_base.dir_out, "private/output"
