@@ -240,29 +240,17 @@ def main(args: argparse.Namespace):
 
     # output original
 
-    fp_terms = args.dir_interm.joinpath("terms.csv")
-    print(f"writing to {fp_terms}")
-    df.loc[
-        lambda d: (d["id"].str.contains("_uiName$", regex=True))
-        | (d["id"].str.contains("^location_", regex=True))
-        | (d["id"].str.contains("^ui_nm_", regex=True))
-        | (d["id"].str.contains("^ui_codex_name_", regex=True))
-        | (d["id"].str.contains("^qname_", regex=True))
-        | (d["id"].str.contains("^ui_maplegend_", regex=True))
-        | (d["id"].str.contains("^ui_nh_", regex=True))
-        | (d["id"].str.contains("^ui_item_info_", regex=True))
-        | (d["id"].str.contains("^ui_item_category_", regex=True))
-        | (d["id"].str.contains("^ui_hud_", regex=True))
-        | (d["id"] == "ui_version_menu")
-        | (d["id"].str.contains("^perk_", regex=True))
-        | (d["id"].str.contains("^ui_tooltip_", regex=True))
-        | (d["id"].str.contains("^ui_in_", regex=True))
-        | (d["id"].str.contains("^perk_combo_", regex=True))
-    ][["id", "text_EN", "text_CZ", "text"]].sort_values(["text"]).to_csv(
+    fp_terms = args.dir_interm.joinpath("terminologies.csv")
+    print(f"writing terminologies to {fp_terms}")
+    filtar_terminologies(df)[["id", "text_EN", "text_CZ", "text"]].sort_values(
+        ["text"]
+    ).to_csv(
         fp_terms,
         index=False,
     )
     del fp_terms
+
+    # 翻訳確認用に残ったカタカナ文字列を取り出す
     pat = regex.compile(r"[\p{katakana}ー゠・]+")
     fp_words = args.dir_root.joinpath("words.csv")
     print(f"writing to {fp_words}")
@@ -313,16 +301,7 @@ def main(args: argparse.Namespace):
     if not args.dir_interm.joinpath("xml").exists():
         args.dir_interm.joinpath("xml").mkdir(parents=True)
 
-    # for (fp,), d in df_modified_all.loc[
-    #    lambda d: d["text"] != d["text_original"]
-    # ].groupby(["fp_EN"]):
-    #    xml = df_2_xml(d)
-    #    print(f"""write to {args.dir_interm.joinpath(f"xml/{fp}")}""")
-    #    xml.write(
-    #        args.dir_interm.joinpath(f"xml/{fp}"),
-    #        xml_declaration=True,
-    #        encoding="utf-8",
-    #    )
+    # 変換結果を集計して出力する
     df_modified_all.loc[
         lambda d: (d["id"].str.contains("^ui_codex_"))
         & ~(d["id"].str.contains("^ui_codex_name_"))
@@ -333,19 +312,13 @@ def main(args: argparse.Namespace):
     print(
         f"{df_as_xml.shape[0]} entries will be output out of {df_modified_all.shape[0]} ({df_as_xml.shape[0]/df_modified_all.shape[0]:.2%}) %"
     )
+    fp_terms_comparison = args.dir_interm.joinpath("comparison.csv")
+    print(f"writing terms to {fp_terms_comparison}")
+    filtar_terminologies(df_modified_all, add_category=True)[
+        ["category"] + [x for x in df_modified_all.columns if x[:4] == "text"]
+    ].drop_duplicates().to_csv(fp_terms_comparison, index=False)
 
     write_separately(df_as_xml, args.dir_out, args.xml_name)
-
-    # xml = df_2_xml(df_as_xml)
-    # print(f"""write to {args.dir_out.joinpath(f"{args.xml_name}.xml")}""")
-    # if not args.dir_out.exists():
-    #    args.dir_out.mkdir(parents=True)
-
-    # xml.write(
-    #    args.dir_out.joinpath("text_AltJPTranslation.xml"),
-    #    xml_declaration=True,
-    #    encoding="utf-8",
-    # )
 
 
 def translate(data: pd.DataFrame, dicts: TranslationDicts) -> pd.DataFrame:
@@ -357,6 +330,7 @@ def translate(data: pd.DataFrame, dicts: TranslationDicts) -> pd.DataFrame:
         以下の列を持つ
         id
         text,
+        text_original,
         text_EN,
         text_CZ,
         fp_lang,
@@ -364,12 +338,24 @@ def translate(data: pd.DataFrame, dicts: TranslationDicts) -> pd.DataFrame:
         fp_CZ
     """
     data["text_original"] = data["text"]
+    assert data["text"].isna().sum() == data["text_original"].isna().sum(), "アホ死ね"
+    if data["text_original"].isna().sum() > 0:
+        raise ValueError("アホ死ね")
     df_modified_id = data.merge(
         dicts.by_id[["id", "modified"]],
         on=["id"],
         how="inner",
     ).assign(text=lambda d: np.where(d["modified"].isna(), d["text"], d["modified"]))[
-        ["id", "text_EN", "text", "fp_lang", "fp_EN", "fp_CZ"]
+        [
+            "id",
+            "text_original",
+            "text_EN",
+            "text_CZ",
+            "text",
+            "fp_lang",
+            "fp_EN",
+            "fp_CZ",
+        ]
     ]
     df_modified_left = data.merge(
         dicts.by_id[["id"]].assign(flag=True), on=["id"], how="left"
@@ -377,12 +363,15 @@ def translate(data: pd.DataFrame, dicts: TranslationDicts) -> pd.DataFrame:
 
     # IDが一致しなかった残りのフィールドに対して単純変換する
     # 文字数大きいものから変換したほうが誤爆しにくいだろう...
-
+    if df_modified_id["text_original"].isna().sum() > 0:
+        raise ValueError("アホ死ね")
     s_text = replace_text(df_modified_left["text"], dicts.by_match)
     df_modified_left["text"] = s_text
     s_text = replace_text(df_modified_left["text"], dicts.rev_by_match)
     df_modified_left["text"] = s_text
     df_modified_all = pd.concat((df_modified_id, df_modified_left))
+    if df_modified_all["text_original"].isna().sum() > 0:
+        raise ValueError("アホ死ね")
     return df_modified_all
 
 
@@ -469,6 +458,77 @@ def write_separately(data: pd.DataFrame, output_dir: Path, base_name: str) -> No
         xml_declaration=True,
         encoding="utf-8",
     )
+
+
+def filtar_terminologies(
+    data: pd.DataFrame, add_category: bool = False
+) -> pd.DataFrame:
+    data = data.loc[
+        lambda d: (d["id"].str.contains("_uiName$", regex=True))
+        | (d["id"].str.contains("^location_", regex=True))
+        | (d["id"].str.contains("^ui_nm_", regex=True))
+        | (d["id"].str.contains("^ui_codex_name_", regex=True))
+        | (d["id"].str.contains("^qname_", regex=True))
+        | (d["id"].str.contains("^ui_maplegend_", regex=True))
+        | (d["id"].str.contains("^ui_nh_", regex=True))
+        | (d["id"].str.contains("^ui_item_info_", regex=True))
+        | (d["id"].str.contains("^ui_item_category_", regex=True))
+        | (d["id"].str.contains("^ui_hud_", regex=True))
+        | (d["id"] == "ui_version_menu")
+        | (d["id"].str.contains("^perk_", regex=True))
+        | (d["id"].str.contains("^ui_tooltip_", regex=True))
+        | (d["id"].str.contains("^ui_in_", regex=True))
+        | (d["id"].str.contains("^perk_combo_", regex=True))
+    ].loc[lambda d: ~d["id"].str.contains("_desc$", regex=True)]
+    if add_category:
+        data = data.assign(
+            category=lambda d: d["id"].case_when(
+                [
+                    # That's why Pandas is very inconvenient and how ugly syntax
+                    (
+                        (data["id"].str.contains("_uiName$", regex=True))
+                        | (data["id"].str.contains("^qname_", regex=True)),
+                        "NPC",
+                    ),
+                    (
+                        (data["id"].str.contains("^location_$", regex=True))
+                        | (data["id"].str.contains("^ui_maplegend_$", regex=True)),
+                        "Location",
+                    ),
+                    (
+                        (data["id"].str.contains("^^ui_nm_$", regex=True))
+                        | (data["id"].str.contains("^ui_nh_$", regex=True)),
+                        "Location",
+                    ),
+                    (
+                        (data["id"].str.contains("^perk_$", regex=True))
+                        | (data["id"].str.contains("^perk_combo_$", regex=True)),
+                        "Skill",
+                    ),
+                    (
+                        (data["id"].str.contains("^ui_codex_name_", regex=True)),
+                        "Codex",
+                    ),
+                ]
+            )
+        )
+    return data
+
+
+def merge_deu_czh(
+    data_new: pd.DataFrame, data_old: pd.DataFrame, dp_langs: Tuple[str, Path]
+) -> pd.DataFrame:
+    data_new = filtar_terminologies(data_new)
+    data_old = filtar_terminologies(data_old)
+    data = data_old.merge(
+        data_new,
+        on=["id"],
+        how="left",
+    )
+    for langname, dp in dp_langs:
+        data_lang = read_xmls(dp)[["id", "text"]].rename(columns={"text": langname})
+        data = data.merge(data_lang, on=["id"], how="left")
+    return data
 
 
 if __name__ == "__main__":
