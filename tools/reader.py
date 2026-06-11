@@ -240,15 +240,15 @@ def main(args: argparse.Namespace):
 
     # output original
 
-    fp_terms = args.dir_interm.joinpath("terminologies.csv")
-    print(f"writing terminologies to {fp_terms}")
+    fp_output_terms = args.dir_interm.joinpath("terminologies.csv")
+    print(f"writing terminologies to {fp_output_terms}")
     filtar_terminologies(df)[["id", "text_EN", "text_CZ", "text"]].sort_values(
         ["text"]
     ).to_csv(
-        fp_terms,
+        fp_output_terms,
         index=False,
     )
-    del fp_terms
+    del fp_output_terms
 
     # 翻訳確認用に残ったカタカナ文字列を取り出す
     pat = regex.compile(r"[\p{katakana}ー゠・]+")
@@ -314,9 +314,13 @@ def main(args: argparse.Namespace):
     )
     fp_terms_comparison = args.dir_interm.joinpath("comparison.csv")
     print(f"writing terms to {fp_terms_comparison}")
-    filtar_terminologies(df_modified_all, add_category=True)[
+    filtar_terminologies(df_modified_all, add_category=True).loc[
+        lambda d: ~d["id"].str.contains("_desc_")
+    ][
         ["category"] + [x for x in df_modified_all.columns if x[:4] == "text"]
-    ].drop_duplicates().to_csv(fp_terms_comparison, index=False)
+    ].drop_duplicates().to_csv(
+        fp_terms_comparison, index=False
+    )
 
     write_separately(df_as_xml, args.dir_out, args.xml_name)
 
@@ -486,29 +490,29 @@ def filtar_terminologies(
                 [
                     # That's why Pandas is very inconvenient and how ugly syntax
                     (
-                        (data["id"].str.contains("_uiName$", regex=True))
-                        | (data["id"].str.contains("^qname_", regex=True)),
+                        (data["id"].str.contains("_uiName$", regex=True)),
                         "NPC",
                     ),
                     (
-                        (data["id"].str.contains("^location_$", regex=True))
-                        | (data["id"].str.contains("^ui_maplegend_$", regex=True)),
+                        (data["id"].str.contains("^location_", regex=True))
+                        | (data["id"].str.contains("^ui_maplegend_", regex=True)),
                         "Location",
                     ),
                     (
-                        (data["id"].str.contains("^^ui_nm_$", regex=True))
-                        | (data["id"].str.contains("^ui_nh_$", regex=True)),
-                        "Location",
+                        (data["id"].str.contains("^ui_nm_", regex=True))
+                        | (data["id"].str.contains("^ui_nh_", regex=True)),
+                        "Item",
                     ),
                     (
-                        (data["id"].str.contains("^perk_$", regex=True))
-                        | (data["id"].str.contains("^perk_combo_$", regex=True)),
+                        (data["id"].str.contains("^perk_", regex=True))
+                        | (data["id"].str.contains("^perk_combo_", regex=True)),
                         "Skill",
                     ),
                     (
                         (data["id"].str.contains("^ui_codex_name_", regex=True)),
                         "Codex",
                     ),
+                    ((data["id"].str.contains("^qname_", regex=True)), "Quest"),
                 ]
             )
         )
