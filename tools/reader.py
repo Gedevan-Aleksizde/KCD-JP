@@ -17,8 +17,9 @@ OUTFILE: List[Tuple[Tuple[str], str]] = [
             r"^ui_nm_",
             r"^ui_nh_",
             r"^ui_in_",
+            r"^perk_",
         ),
-        "ui_name",
+        "name",
     ),
     (
         (
