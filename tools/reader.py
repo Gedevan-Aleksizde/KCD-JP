@@ -11,19 +11,52 @@ import pandas as pd
 import regex
 from module.params import parser, rename_args
 
-OUTFILE: List[Tuple[str, str]] = [
+OUTFILE: List[Tuple[Tuple[str], str]] = [
     (
-        r"^ui_codex_",
-        "codex",
-    ),
-    (
-        r"^ui_nm_",
+        (
+            r"^ui_nm_",
+            r"^ui_nh_",
+            r"^ui_in_",
+        ),
         "ui_name",
     ),
     (
-        r"^ui_",
+        (
+            r"^ui_shield_",
+            r"^ui_item_info_category_",
+            r"^ui_hud_",
+            r"^ui_derivstat_",
+            r"^ui_dlg_",
+            r"^ui_fac_",
+            r"^ui_helpoverlay_",
+            r"^ui_pros_",
+            r"^ui_keybinds_",
+            r"^ui_reroll_",
+        ),
         "ui",
     ),
+    ((r"^goss_gossip_",), "smalltalk"),
+    ((r"^char_",), "souls"),
+    (
+        (
+            r"^ui_maplegend_",
+            r"^location_",
+        ),
+        "location",
+    ),
+    ((r"^ui_codex_",), "codex"),
+    ((r"^lorebook_",), "book"),
+    (
+        (
+            r"^ui_dialog_",
+            r"^ui_finalni_",
+            r"^ui_diagnoza_",
+            r"^ui_devecka_",
+        ),
+        "dialog",
+    ),
+    ((r"^ui_",), "ui_misc"),
+    ((r"^lore_",), "lore"),
 ]
 
 
@@ -430,8 +463,17 @@ def write_separately(data: pd.DataFrame, output_dir: Path, base_name: str) -> No
     テキストデータを適当なXMLファイルに分割して保存する.
     TODO: 全部1つのファイルにいれるとなぜかうまく読み込まれなかった. ファイルサイズか何かに制約がある?
     """
-    for pattern, suffix in OUTFILE:
-        df_sub = data.loc[lambda d: d["id"].str.contains(pattern, regex=True)]
+    for patterns, suffix in OUTFILE:
+        df_sub = data.loc[
+            lambda d: np.array(
+                [
+                    any(x)
+                    for x in zip(
+                        *[d["id"].str.contains(pat, regex=True) for pat in patterns]
+                    )
+                ]
+            )
+        ]
         data = (
             data.merge(df_sub[["id"]].assign(anti=True), on=["id"], how="left")
             .assign(
